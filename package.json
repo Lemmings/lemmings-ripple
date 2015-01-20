@@ -1,0 +1,34 @@
+{
+  "name": "lemmings-ripple",
+  "author": "lemmings-technology<lemmings.technology@gmail.com>",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "agent-fsm":"",
+    "bluebird":"",
+    "ripple-usecase":"git://github.com/you21979/node-ripple-usecase.git",
+    "ripple-lib-promise":"git://github.com/you21979/node-ripple-lib-promise.git"
+  },
+  "readmeFilename": "README.md",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "istanbul":"",
+    "coveralls":"",
+    "power-assert":"",
+    "mocha":""
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+  },
+  "repository": {
+  },
+  "keywords": [
+    "ripple",
+    "bot"
+  ],
+  "license": "MIT",
+  "bugs": {
+  }
+}
