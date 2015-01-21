@@ -4,7 +4,7 @@
 
 ```
 {
- "agent":"sample 1",
+ "agent":"sample",
  "pair" : "XRP_JPY.r94s8px6kSw1uZ1MV98dhSRTvc6VMPoPcN"
 }
 ```
@@ -13,7 +13,7 @@
 
 ```
 {
- "agent":"sample 2",
+ "agent":"sample",
  "pair" : "XRP_JPY.r94s8px6kSw1uZ1MV98dhSRTvc6VMPoPcN"
 }
 ```
@@ -22,7 +22,7 @@
 
 ```
 {
- "agent":"sample 3",
+ "agent":"sample",
  "pair" : "XRP_JPY.r94s8px6kSw1uZ1MV98dhSRTvc6VMPoPcN"
 }
 ```
