@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 var rp = require('ripple-lib-promise');
 var usecase = require('ripple-usecase');
+var pluginLoader = require('./plugin_loader');
+var agentLoader = require('./agent_loader');
 
 var log = console.log;
 
@@ -23,25 +25,39 @@ var ledger_loop = function(remote, update_func){
     })
 }
 
-var AgentManager = require('./lib/agent_manager');
-var agentManager = new AgentManager();
-var initialize = function(remote){
+var agent_init = function(){
+    var plugins = pluginLoader.scan('./plugins');
+    var list = [];
+    agentLoader.scan('./agents').forEach(function(a){
+        plugins.filter(function(v){ return v.name === a.data.agent }).forEach(function(p){
+            list.push(function(remote){
+                return p.createInstance(remote, a.data);
+            })
+        });
+    })
+    return list;
+}
 
+
+var initialize = function(remote, agents){
     ledger_loop(remote, function(info){
-        agentManager.run(info);
+        agents.forEach(function(agent){
+            agent.update();
+        })
     });
-
 }
 
 var main = module.exports = function(){
+    var agentlist = agent_init();
 
     var connection_timeout = 60;
     log('lemmings-ripple startup');
-    agentManager.initialize(['./sample_ai']).then(function(){
-        return rp.createConnect(connection_timeout).then(function(remote){
-            log('lemmings-ripple rippled websocket connected');
-            initialize(remote);
+    rp.createConnect(connection_timeout).then(function(remote){
+        log('lemmings-ripple rippled websocket connected');
+        var agents = agentlist.map(function(v){
+            return v(remote);
         })
+        initialize(remote, agents);
     })
 }
 

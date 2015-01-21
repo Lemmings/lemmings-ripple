@@ -28,6 +28,8 @@ node_modules
 .lock-wscript
 
 # user data
-wallet.json
-config.json
+*.json
+
+#agents/*
+#plugins/*
 
