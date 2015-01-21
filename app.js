@@ -54,6 +54,7 @@ var initialize = function(remote, agents){
     })
     ledger_loop(remote, function(info){
         agents.forEach(function(agent){
+            agent.setLedger(info);
             agent.update();
         })
     });

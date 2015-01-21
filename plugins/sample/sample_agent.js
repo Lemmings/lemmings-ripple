@@ -6,18 +6,12 @@ var log = console.log;
 var SampleAgent = module.exports = function(remote, wallet){
     this.lastprice = 0;
     this.book = {asks:[], bids:[]};
+    this.info = {}
 
     this.pair = wallet.pair;
-    this.wallets = {
-        bid : new usecase.TradeWallet(remote, wallet.bid.address, wallet.bid.secret),
-        ask : new usecase.TradeWallet(remote, wallet.ask.address, wallet.ask.secret),
-    }
 
     // must be last initialize
-    this.agents = {
-        bid : agent(this, 1, 'bid'),
-        ask : agent(this, 2, 'ask'),
-    }
+    this.agent = agent(this, 1, 'watch');
 }
 SampleAgent.prototype.setLastPrice = function(lastprice){
     this.lastprice = lastprice;
@@ -25,12 +19,35 @@ SampleAgent.prototype.setLastPrice = function(lastprice){
 SampleAgent.prototype.setOrderBook = function(book){
     this.book = book;
 }
+SampleAgent.prototype.setLedger = function(info){
+    this.info = info;
+}
 SampleAgent.prototype.update = function(){
-    this.agents.bid.heartbeat();
-    this.agents.ask.heartbeat();
+    this.agent.heartbeat();
 }
 SampleAgent.prototype.checkMarket = function(type){
-    console.log('I am a Sample Agent[%s]. watching %s', type, this.pair);
+    var self = this;
+    var msglist = [];
+    msglist.push(function(){
+        console.log('ripple is %s. transaction count is %d', self.info.txn_count > 15 ? 'busy' : 'free', self.info.txn_count)
+    })
+    msglist.push(function(){
+        console.log('ripple ledger close time. %s.', self.info.time)
+    })
+    msglist.push(function(){
+        console.log('I\'m working %d seconds.', self.info.uptime)
+    })
+    msglist.push(function(){
+        console.log('ripple current ledger index.', self.info.index)
+    })
+    msglist.push(function(){
+        console.log('I am a Sample Agent[%s]. watching %s', type, self.pair);
+    })
+    msglist.push(function(){
+        console.log('hello world.');
+    })
+    var rnd = Math.random() * msglist.length;
+    msglist[Math.floor(rnd)]();
     return false;
 }
 SampleAgent.prototype.getSleepTime = function(){
