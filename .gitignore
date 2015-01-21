@@ -30,6 +30,6 @@ node_modules
 # user data
 *.json
 
-#agents/*
-#plugins/*
+agents/*
+plugins/*
 
