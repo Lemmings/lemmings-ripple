@@ -1,0 +1,9 @@
+# sample agent setting
+
+test.json
+```
+{
+ "agent":"sample",
+ "pair" : "XRP_JPY.r94s8px6kSw1uZ1MV98dhSRTvc6VMPoPcN"
+}
+```
