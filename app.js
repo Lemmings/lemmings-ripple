@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 var rp = require('ripple-lib-promise');
 var usecase = require('ripple-usecase');
-var pluginLoader = require('./plugin_loader');
-var agentLoader = require('./agent_loader');
-var sensor = require('./sensor');
+var pluginLoader = require('./lib/plugin_loader');
+var agentLoader = require('./lib/agent_loader');
+var sensor = require('./lib/sensor');
 
 var log = console.log;
 
@@ -27,10 +27,13 @@ var ledger_loop = function(remote, update_func){
 }
 
 var agent_init = function(){
-    var plugins = pluginLoader.scan('./plugins');
+    var plugins = pluginLoader.scan(__dirname + '/plugins');
     var list = [];
-    agentLoader.scan('./agents').forEach(function(a){
-        plugins.filter(function(v){ return v.name === a.data.agent }).forEach(function(p){
+    agentLoader.scan(__dirname + '/agents').forEach(function(a){
+        plugins.filter(function(v){
+            return a.data.load === true
+                && v.name === a.data.agent
+        }).forEach(function(p){
             list.push(function(remote){
                 console.log('agent install:', a.name)
                 return p.createInstance(remote, a.data);
