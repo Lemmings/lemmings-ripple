@@ -33,7 +33,10 @@ var tradeConvert = function(pair, action, gets, pays, offerAccount, takerAccount
                 pair : pair,
                 type : action,
                 price : parseFloat(pays.ratio_human(gets).to_human().split(',').join('')),
-                amount : parseFloat(gets.to_human().split(',').join('')),
+                amount : {
+                    base : parseFloat(gets.to_human().split(',').join('')),
+                    counter : parseFloat(pays.to_human().split(',').join('')),
+                },
             });
             break;
         case 'bids':
@@ -41,7 +44,10 @@ var tradeConvert = function(pair, action, gets, pays, offerAccount, takerAccount
                 pair : pair,
                 type : action,
                 price : parseFloat(gets.ratio_human(pays).to_human().split(',').join('')),
-                amount : parseFloat(pays.to_human().split(',').join('')),
+                amount : {
+                    base : parseFloat(pays.to_human().split(',').join('')),
+                    counter : parseFloat(gets.to_human().split(',').join('')),
+                },
             })
             break;
         }
