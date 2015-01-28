@@ -1,6 +1,9 @@
 var usecase = require('ripple-usecase');
 var Promise = require('bluebird');
-var log = console.log;
+var redis = require('redis');
+var agentInitialize = require('./lastprice_fsm');
+
+var MASTERKEY = 'lemmings|ripple|lastprice';
 
 var createBook = function(remote, pair, list){
     var w = pair.split('_');
@@ -99,6 +102,7 @@ var LastPrice = module.exports = function(remote, wallet, appEvent){
         self.setLedger(info);
     }
     this.listeners = listeners;
+    this.rcl = redis.createClient();
 
     this.work = [];
     this.book = createBook(remote, wallet.pair, this.work);
@@ -111,6 +115,7 @@ LastPrice.prototype.initialize = function(){
     Object.keys(this.listeners).forEach(function(key){
         self.event.on(key, self.listeners[key]);
     })
+    this.agent = agentInitialize(self, 1, 'watch');
 }
 LastPrice.prototype.finalize = function(){
     var self = this;
@@ -122,12 +127,33 @@ LastPrice.prototype.setLedger = function(info){
     this.info = info;
 }
 LastPrice.prototype.update = function(){
+    this.agent.heartbeat();
+}
+LastPrice.prototype.load = function(){
+    var self = this;
+    return new Promise(function(resolve, reject){
+        self.rcl.hget(MASTERKEY, self.pair, function(err, res){
+            if(err) reject(err);
+            else resolve(JSON.parse(res));
+        });
+    }).then(function(res){
+        if(res){
+            self.event.emit('lastprice', self.pair, res.price);
+        }
+    })
+}
+LastPrice.prototype.procBook = function(){
     var self = this;
     if(this.work.length > 0){
         calcLastPrice(this.work).forEach(function(w){
             self.event.emit('lastprice', self.pair, w.price);
+            self.rcl.hset(MASTERKEY, self.pair, JSON.stringify(w));
         })
         this.work.length = 0;
     }
 }
 
+LastPrice.prototype.log = function(msg){
+    var t = usecase.util.time.now();
+    console.log(t.format('YYYY-MM-DD HH:mm:ss')+',LASTPRICE,' + msg);
+}
