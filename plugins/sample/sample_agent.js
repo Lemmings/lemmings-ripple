@@ -3,15 +3,42 @@ var Promise = require('bluebird');
 var agent = require('./basic_agent');
 var log = console.log;
 
-var SampleAgent = module.exports = function(remote, wallet){
+var SampleAgent = module.exports = function(remote, wallet, appEvent){
     this.lastprice = 0;
     this.book = {asks:[], bids:[]};
     this.info = {}
 
     this.pair = wallet.pair;
+    this.event = appEvent;
+
+    var self = this;
+    var listeners = {};
+    listeners['lastprice'] = function(pair, lastprice){
+        if(self.pair === pair)self.setLastPrice(lastprice);
+    }
+    listeners['orderbook'] = function(pair, book){
+        if(self.pair === pair)self.setOrderBook(book);
+    }
+    listeners['ledger'] = function(info){
+        self.setLedger(info);
+    }
+    this.listeners = listeners;
 
     // must be last initialize
+    this.initialize();
+}
+SampleAgent.prototype.initialize = function(){
+    var self = this;
+    Object.keys(this.listeners).forEach(function(key){
+        self.event.on(key, self.listeners[key]);
+    })
     this.agent = agent(this, 1, 'watch');
+}
+SampleAgent.prototype.finalize = function(){
+    var self = this;
+    Object.keys(this.listeners).forEach(function(key){
+        self.event.removeListener(key, self.listeners[key]);
+    })
 }
 SampleAgent.prototype.setLastPrice = function(lastprice){
     this.lastprice = lastprice;
